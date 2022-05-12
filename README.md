@@ -10,15 +10,7 @@ This package is greatly inspired by [@jayesbe](https://github.com/jayesbe)'s ama
     - or -
     yarn add react-native-cached-image
 
-We use [`react-native-fetch-blob`](https://github.com/wkh237/react-native-fetch-blob#installation) to handle file system access in this package and it requires an extra step during the installation.  
-
-_You should only have to do this once._
-
-    react-native link react-native-fetch-blob
-
-Or, if you want to add Android permissions to AndroidManifest.xml automatically, use this one:
-
-    RNFB_ANDROID_PERMISSIONS=true react-native link react-native-fetch-blob
+We use [`rn-fetch-blob`](https://github.com/joltup/rn-fetch-blob#user-content-installation) to handle file system access in this package. Follow their installation guids.
 
 ### Network Status - Android only
 Add the following line to your android/app/src/AndroidManifest.xml
@@ -78,9 +70,14 @@ This is where all the cache magic takes place.
 The API usually takes a *URL* and a set of [`ImageCacheManagerOptions`](#imagecachemanageroptions).
 
 #### `ImageCacheManager.downloadAndCacheUrl(url: String, options: ImageCacheManagerOptions): Promise<String>`
-Check the cache for the the URL (after removing fixing the query string according to `ImageCacheManagerOptions.useQueryParamsInCacheKey`).
+Check the cache for the URL (after removing fixing the query string according to `ImageCacheManagerOptions.useQueryParamsInCacheKey`).
 If the URL exists in cache and is not expired, resolve with the local cached file path.
 Otherwise, download the file to the cache folder, add it to the cache and then return the cached file path.
+
+#### `ImageCacheManager.checkIsAlreadyExistCacheUrl(url: String, options: ImageCacheManagerOptions): Promise<String | null>`
+Check the cache for the URL
+If the URL exists in cache and is not expired, resolve with the local cached file path.
+Otherwise, resolve with null.
 
 #### `ImageCacheManager.seedAndCacheUrl(url: String, seedPath: String, options: ImageCacheManagerOptions): Promise<String>`
 Check the cache for the the URL (after removing fixing the query string according to `ImageCacheManagerOptions.useQueryParamsInCacheKey`).

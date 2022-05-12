@@ -66,6 +66,36 @@ module.exports = (defaultOptions = {}, urlCache = MemoryCache, fs = fsUtils, pat
             });
     }
 
+    function isAlreadyExistCacheUrl(url, options) {
+        if (!isCacheable(url)) {
+            return Promise.reject(new Error('Url is not cacheable'));
+        }
+        // allow CachedImage to provide custom options
+        _.defaults(options, defaultOptions);
+        // cacheableUrl contains only the needed query params
+        const cacheableUrl = path.getCacheableUrl(url, options.useQueryParamsInCacheKey);
+        // note: urlCache may remove the entry if it expired so we need to remove the leftover file manually
+        return urlCache.get(cacheableUrl)
+            .then(fileRelativePath => {
+                if (!fileRelativePath) {
+                    // console.log('ImageCacheManager: url cache miss', cacheableUrl);
+                    // throw new Error('URL expired or not in cache');
+                    return null;
+                }
+                // console.log('ImageCacheManager: url cache hit', cacheableUrl);
+                const cachedFilePath = `${options.cacheLocation}/${fileRelativePath}`;
+
+                return fs.exists(cachedFilePath)
+                    .then((exists) => {
+                        if (exists) {
+                            return cachedFilePath
+                        } else {
+                            return null;
+                        }
+                    });
+            });
+    }
+
     return {
 
         /**
@@ -79,6 +109,20 @@ module.exports = (defaultOptions = {}, urlCache = MemoryCache, fs = fsUtils, pat
                 url,
                 options,
                 filePath => fs.downloadFile(url, filePath, options.headers)
+            );
+        },
+
+        /**
+         * check is cached file already exist in cache.
+         * Resolves to cachedFilePath string or null if not exist
+         * @param url
+         * @param options
+         * @returns {Promise}
+         */
+        checkIsAlreadyExistCacheUrl(url, options = {}) {
+            return isAlreadyExistCacheUrl(
+                url,
+                options,
             );
         },
 
